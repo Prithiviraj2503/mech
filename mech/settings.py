@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'mech-4pan.onrender.com',
+    'mech-jibc.onrender.com',
     'localhost',
     '127.0.0.1',
 ]
@@ -77,6 +79,8 @@ WSGI_APPLICATION = 'mech.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Force SQLite for all environments (including Render)
+# to avoid DB URL / provider mismatch in this repo.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
