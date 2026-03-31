@@ -8,12 +8,12 @@
         <h2>Workflow Dashboard</h2>
         <p>Each role sees only the queue it is responsible for in the controlled approval pipeline.</p>
     </div>
-    {% if user.role == 'vendor' %}
+    {% if user.is_authenticated and user.role == 'vendor' %}
         <a href="{% url 'vendor_portal:document_create' %}" class="btn">Create New Document</a>
     {% endif %}
 </section>
 
-{% if user.role == 'vendor' %}
+{% if user.is_authenticated and user.role == 'vendor' %}
     <section class="grid three">
         <article class="card stat">
             <h3>Draft / Rejected</h3>
@@ -80,7 +80,7 @@
 {% else %}
     <section class="card">
         <h3 class="section-title">
-            {% if user.role == 'qc' %}QA Review Queue{% elif user.role == 'purchase' %}Purchase Review Queue{% else %}Recent Documents{% endif %}
+            {% if user.is_authenticated and user.role == 'qc' %}QA Review Queue{% elif user.is_authenticated and user.role == 'purchase' %}Purchase Review Queue{% else %}Recent Documents{% endif %}
         </h3>
         <table>
             <thead>

@@ -40,6 +40,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "vendor_portal/dashboard.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("vendor_portal:login")
         if request.user.is_superuser or request.user.role == UserRole.ADMIN:
             return redirect("vendor_portal:admin_handling")
         return super().dispatch(request, *args, **kwargs)

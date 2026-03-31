@@ -8,7 +8,7 @@
         <h2>Document Register</h2>
         <p>Controlled list of certification records visible to your role.</p>
     </div>
-    {% if user.role == 'vendor' %}
+    {% if user.is_authenticated and user.role == 'vendor' %}
         <a href="{% url 'vendor_portal:document_create' %}" class="btn">Create Document</a>
     {% endif %}
 </section>
