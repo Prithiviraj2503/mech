@@ -1,0 +1,46 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Admin Handling | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>Admin Handling</h2>
+        <p>Manage vendor master data and company assets used by the controlled certificate workflow.</p>
+    </div>
+</section>
+
+<section class="grid two">
+    <article class="card stat">
+        <h3>Vendors</h3>
+        <strong>{{ vendor_count }}</strong>
+        <div class="actions">
+            <a href="{% url 'vendor_portal:vendor_management' %}" class="btn">Manage Vendors</a>
+        </div>
+    </article>
+    <article class="card stat">
+        <h3>Purchase</h3>
+        <strong>{{ purchase_count }}</strong>
+        <div class="actions">
+            <a href="{% url 'vendor_portal:purchase_management' %}" class="btn">Manage Purchase</a>
+        </div>
+    </article>
+</section>
+
+<section class="grid two" style="margin-top: 20px;">
+    <article class="card stat">
+        <h3>QA</h3>
+        <strong>{{ qa_count }}</strong>
+        <div class="actions">
+            <a href="{% url 'vendor_portal:qa_management' %}" class="btn">Manage QA</a>
+        </div>
+    </article>
+    <article class="card stat">
+        <h3>Company Data</h3>
+        <strong>{% if company_data and company_data.company_name %}Ready{% else %}Pending{% endif %}</strong>
+        <div class="actions">
+            <a href="{% url 'vendor_portal:company_data' %}" class="btn">Manage Company Data</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

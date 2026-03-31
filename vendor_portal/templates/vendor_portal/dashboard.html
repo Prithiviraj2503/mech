@@ -1,0 +1,109 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Dashboard | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>Workflow Dashboard</h2>
+        <p>Each role sees only the queue it is responsible for in the controlled approval pipeline.</p>
+    </div>
+    {% if user.role == 'vendor' %}
+        <a href="{% url 'vendor_portal:document_create' %}" class="btn">Create New Document</a>
+    {% endif %}
+</section>
+
+{% if user.role == 'vendor' %}
+    <section class="grid three">
+        <article class="card stat">
+            <h3>Draft / Rejected</h3>
+            <strong>{{ draft_documents|length }}</strong>
+        </article>
+        <article class="card stat">
+            <h3>Under Review</h3>
+            <strong>{{ in_review_documents|length }}</strong>
+        </article>
+        <article class="card stat">
+            <h3>Final Approved</h3>
+            <strong>{{ final_documents|length }}</strong>
+        </article>
+    </section>
+
+    <section class="grid two" style="margin-top: 20px;">
+        <article class="card">
+            <h3 class="section-title">Needs Your Attention</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Status</th>
+                        <th>Customer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in draft_documents %}
+                        <tr>
+                            <td><a href="{% url 'vendor_portal:document_detail' doc.pk %}">{{ doc.document_number }}</a></td>
+                            <td><span class="pill">{{ doc.get_status_display }}</span></td>
+                            <td>{{ doc.customer_name }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3">No draft or rejected documents.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+        <article class="card">
+            <h3 class="section-title">In Review</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Status</th>
+                        <th>Customer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in in_review_documents %}
+                        <tr>
+                            <td><a href="{% url 'vendor_portal:document_detail' doc.pk %}">{{ doc.document_number }}</a></td>
+                            <td><span class="pill">{{ doc.get_status_display }}</span></td>
+                            <td>{{ doc.customer_name }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3">No submitted documents waiting in workflow.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+    </section>
+{% else %}
+    <section class="card">
+        <h3 class="section-title">
+            {% if user.role == 'qc' %}QA Review Queue{% elif user.role == 'purchase' %}Purchase Review Queue{% else %}Recent Documents{% endif %}
+        </h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Vendor</th>
+                    <th>Status</th>
+                    <th>Customer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in queue_documents %}
+                    <tr>
+                        <td><a href="{% url 'vendor_portal:document_detail' doc.pk %}">{{ doc.document_number }}</a></td>
+                        <td>{{ doc.vendor.username }}</td>
+                        <td><span class="pill">{{ doc.get_status_display }}</span></td>
+                        <td>{{ doc.customer_name }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">No documents are waiting in your queue.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endif %}
+{% endblock %}

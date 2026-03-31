@@ -1,0 +1,500 @@
+{% extends "vendor_portal/base.html" %}
+{% load form_extras %}
+
+{% block title %}{% if form.instance.pk %}Edit Document{% else %}New Document{% endif %} | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>{% if form.instance.pk %}Supplier Certificate Template{% else %}Create Supplier Certificate{% endif %}</h2>
+        <p>Fill the certificate in the same structure as your supplier Excel template so the final PDF follows the same sheet.</p>
+        {% if vendor_profile %}
+            <p class="tiny" style="margin-top: 8px;">
+                Vendor master loaded: {{ vendor_profile.vendor_name }}{% if vendor_profile.user.email %} | {{ vendor_profile.user.email }}{% endif %}{% if vendor_profile.phone %} | {{ vendor_profile.phone }}{% endif %}
+            </p>
+        {% endif %}
+    </div>
+    {% if form.instance.pk %}
+        <div class="status-note">
+            <span class="pill">{{ form.instance.get_status_display }}</span>
+            <span id="autosave-status">Autosave ready</span>
+        </div>
+    {% endif %}
+</section>
+
+<form method="post" class="grid" style="gap: 20px;" id="document-form" {% if form.instance.pk %}data-autosave-url="{% url 'vendor_portal:document_autosave' form.instance.pk %}"{% endif %}>
+    {% csrf_token %}
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <tr>
+                    <th style="width: 16%; text-align: center; background: #ffffff;">
+                        Vendor Logo
+                        {% if vendor_profile and vendor_profile.logo %}
+                            <div style="margin-top: 8px;">
+                                <img src="{{ vendor_profile.logo.url }}" alt="Vendor Logo" style="display:block; max-width: 120px; max-height: 70px; margin: 0 auto;">
+                            </div>
+                        {% else %}
+                            <div class="tiny" style="margin-top: 8px;">No vendor logo uploaded</div>
+                        {% endif %}
+                    </th>
+                    <td style="width: 64%; text-align: center;">
+                        <div style="background: #e7e1ef; padding: 8px 6px; font-weight: 700; font-size: 1.05rem; line-height: 1.35;">
+                            {{ form.company_name.as_hidden }}
+                            {{ form.company_address.as_hidden }}
+                            {{ form.company_name.value|default:"" }}<br>
+                            {{ form.company_address.value|default:"" }}
+                        </div>
+                    </td>
+                    <th style="width: 20%; text-align: center; background: #ffffff;">
+                        Barcode
+                        {% if vendor_profile and vendor_profile.barcode %}
+                            <div style="margin-top: 8px;">
+                                <img src="{{ vendor_profile.barcode.url }}" alt="Vendor Barcode" style="display:block; max-width: 120px; max-height: 70px; margin: 0 auto;">
+                            </div>
+                        {% else %}
+                            <div class="tiny" style="margin-top: 8px;">No barcode uploaded</div>
+                        {% endif %}
+                        <div style="margin-top: 8px;">{{ form.barcode_value }}</div>
+                    </th>
+                </tr>
+                <tr>
+                    <td style="font-style: italic; font-weight: 700;">
+                        TC No:{{ form.document_number }}
+                    </td>
+                    <td style="text-align: center; font-weight: 700; line-height: 1.25;">
+                        <div style="font-size: 0.98rem;">TEST CERTIFICATE</div>
+                        <div style="font-size: 0.96rem;">AS PER EN 10204 3.1</div>
+                    </td>
+                    <td style="font-style: italic; font-weight: 700;">
+                        Date:{{ form.certificate_date }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 17%;">
+                    <col style="width: 33%;">
+                    <col style="width: 17%;">
+                    <col style="width: 33%;">
+                </colgroup>
+                <tr>
+                    <th colspan="2" style="text-align: center; background: #e7e1c5;">CUSTOMER DETAILS</th>
+                    <th colspan="2" style="text-align: center; background: #e7e1c5;">RAW MATERIAL DETAILS</th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Customer</th>
+                    <td>{{ form.customer_name }}</td>
+                    <th style="background: #ffffff; white-space: nowrap;">Maker</th>
+                    <td>{{ form.maker }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">P.O.No./Date</th>
+                    <td>{{ form.po_number }}</td>
+                    <th style="background: #ffffff; white-space: nowrap;">Mill Certificate</th>
+                    <td>{{ form.mill_certificate_number }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Material Grade</th>
+                    <td>{{ form.material_grade }}</td>
+                    <th style="background: #ffffff; white-space: nowrap;">Rm Specifications</th>
+                    <td>{{ form.raw_material_specification }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Material Standard</th>
+                    <td>{{ form.material_standard }}</td>
+                    <th style="background: #ffffff; white-space: nowrap;">Mfg Process</th>
+                    <td>{{ form.manufacturing_process }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">TDC NO</th>
+                    <td>{{ form.tdc_number }}</td>
+                    <th style="background: #ffffff; white-space: nowrap;">Heat No</th>
+                    <td>{{ form.heat_number }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td></td>
+                    <th style="background: #ffffff; white-space: nowrap;">Specification/Standard</th>
+                    <td>{{ form.raw_material_standard }}</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <tr>
+                    <th colspan="4" style="text-align: center; background: #e7e1c5;">FORGING DETAILS</th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;">Heat No</th>
+                    <td>{{ form|field_from_name:"forging_heat_no" }}</td>
+                    <th style="background: #ffffff;">Forge method</th>
+                    <td>{{ form|field_from_name:"forging_forge_method" }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;">Heat Batch No</th>
+                    <td>{{ form|field_from_name:"forging_heat_batch_no" }}</td>
+                    <th style="background: #ffffff;">Supplier Identification</th>
+                    <td>{{ form|field_from_name:"forging_supplier_identification" }}</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 8%;">
+                    <col style="width: 8%;">
+                    <col style="width: 6%;">
+                    <col style="width: 6%;">
+                    <col style="width: 6%;">
+                    <col style="width: 6%;">
+                    <col style="width: 6%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 6%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 9%;">
+                    <col style="width: 6%;">
+                </colgroup>
+                <tr>
+                    <th colspan="16" style="text-align: center; background: #e7e1c5;">CHEMICAL ANALYSIS (%)</th>
+                </tr>
+                <tr>
+                    <th>ELEMENTS (%)</th>
+                    <th></th>
+                    {% for key, label in form.chemical_columns %}
+                        <th>{{ label }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">As per</th>
+                    <th style="background: #ffffff; white-space: nowrap;">Min :</th>
+                    {% for key, label in form.chemical_columns %}
+                        {% field_by_parts form "chemical_min_" key as chemical_min_field %}
+                        <td>{{ chemical_min_field }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Specfn</th>
+                    <th style="background: #ffffff; white-space: nowrap;">Max :</th>
+                    {% for key, label in form.chemical_columns %}
+                        {% field_by_parts form "chemical_max_" key as chemical_max_field %}
+                        <td>{{ chemical_max_field }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Actual</th>
+                    <th style="background: #ffffff;"></th>
+                    {% for key, label in form.chemical_columns %}
+                        {% field_by_parts form "chemical_actual_" key as chemical_actual_field %}
+                        <td>{{ chemical_actual_field }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 7%;">
+                    <col style="width: 9%;">
+                    <col style="width: 9%;">
+                    <col style="width: 7%;">
+                    <col style="width: 11%;">
+                    <col style="width: 7%;">
+                    <col style="width: 7%;">
+                    <col style="width: 9%;">
+                    <col style="width: 9%;">
+                    <col style="width: 12%;">
+                    <col style="width: 6%;">
+                </colgroup>
+                <tr>
+                    <th colspan="11" style="text-align: center; background: #e7e1c5;">MECHANICAL PROPERTIES</th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">As per</th>
+                    <th>YS<br>(0.2%offset)</th>
+                    <th>UTS</th>
+                    <th>%EL</th>
+                    <th>%Reduction<br>of<br>Area</th>
+                    <th colspan="2">Hardness</th>
+                    <th colspan="3">ImpactTest<br><span style="font-weight: 600;">Specimen size(Akv)<br>10*10*55mm</span></th>
+                    <th style="white-space: nowrap;">-46`C</th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Specfn</th>
+                    <th>MPa</th>
+                    <th>MPa</th>
+                    <th>GL=2</th>
+                    <th></th>
+                    <th colspan="2">HBW</th>
+                    <th colspan="2">Single value(J)</th>
+                    <th>Min.</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Min</th>
+                    <td>{{ form.mechanical_spec_min_yield_strength }}</td>
+                    <td>{{ form.mechanical_spec_min_tensile_strength }}</td>
+                    <td>{{ form.mechanical_spec_min_elongation }}</td>
+                    <td>{{ form.mechanical_spec_min_reduction_of_area }}</td>
+                    <td colspan="2"></td>
+                    <td colspan="2"></td>
+                    <td>{{ form.mechanical_impact_single_min }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Max</th>
+                    <td>{{ form.mechanical_spec_max_yield_strength }}</td>
+                    <td>{{ form.mechanical_spec_max_tensile_strength }}</td>
+                    <td>{{ form.mechanical_spec_max_elongation }}</td>
+                    <td>{{ form.mechanical_spec_max_reduction_of_area }}</td>
+                    <td colspan="2">{{ form.mechanical_hardness_spec_max }}</td>
+                    <td colspan="2">Average value(J)</td>
+                    <td>{{ form.mechanical_impact_average_min }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff; white-space: nowrap;">Actual</th>
+                    <td>{{ form.mechanical_actual_yield_strength }}</td>
+                    <td>{{ form.mechanical_actual_tensile_strength }}</td>
+                    <td>{{ form.mechanical_actual_elongation }}</td>
+                    <td>{{ form.mechanical_actual_reduction_of_area }}</td>
+                    <td>{{ form.mechanical_hardness_actual_0 }}</td>
+                    <td>{{ form.mechanical_hardness_actual_1 }}</td>
+                    <td>{{ form.mechanical_hardness_actual_2 }}</td>
+                    <td>{{ form.mechanical_impact_actual_0 }}</td>
+                    <td>{{ form.mechanical_impact_actual_1 }}</td>
+                    <td>{{ form.mechanical_impact_actual_2 }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td colspan="9">{{ form.mechanical_impact_temperature.as_hidden }}{{ form.mechanical_impact_specimen_size.as_hidden }}</td>
+                    <td>{{ form.mechanical_impact_low_temp_actual }}</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 12%;">
+                    <col style="width: 14%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 13%;">
+                    <col style="width: 15%;">
+                </colgroup>
+                <tr>
+                    <th colspan="6" style="text-align: center; background: #e7e1c5;">HEAT TREATMENT</th>
+                </tr>
+                <tr>
+                    <th style="white-space: nowrap;">Heat No</th>
+                    <td>{{ form|field_from_name:"heat_header_no" }}</td>
+                    <th style="white-space: nowrap;">Heat Treatment Process</th>
+                    <td>{{ form|field_from_name:"heat_process" }}</td>
+                    <th style="white-space: nowrap;">Furnace Type</th>
+                    <td>{{ form|field_from_name:"heat_furnace_type" }}</td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <td></td>
+                    <th style="white-space: nowrap;">Temperature</th>
+                    <th style="white-space: nowrap;">Soking Time</th>
+                    <th style="white-space: nowrap;">Cooling Medium</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td style="background: #ffffff;"></td>
+                    <th style="white-space: nowrap;">Deg C</th>
+                    <th style="white-space: nowrap;">Hrs</th>
+                    <th></th>
+                    <th style="background: #ffffff;"></th>
+                </tr>
+                <tr>
+                    <th style="white-space: nowrap;">Heat Batch No</th>
+                    <td>{{ form|field_from_name:"heat_batch_no" }}</td>
+                    {% field_by_parts form "heat_row_" 0 "_temperature" as heat_temp_0 %}
+                    {% field_by_parts form "heat_row_" 0 "_hours" as heat_hours_0 %}
+                    {% field_by_parts form "heat_row_" 0 "_cooling" as heat_cooling_0 %}
+                    <td>{{ heat_temp_0 }}</td>
+                    <td>{{ heat_hours_0 }}</td>
+                    <td>{{ heat_cooling_0 }}</td>
+                    <th style="white-space: nowrap;">HT Furnace No</th>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td style="background: #ffffff;"></td>
+                    {% field_by_parts form "heat_row_" 1 "_temperature" as heat_temp_1 %}
+                    {% field_by_parts form "heat_row_" 1 "_hours" as heat_hours_1 %}
+                    {% field_by_parts form "heat_row_" 1 "_cooling" as heat_cooling_1 %}
+                    <td>{{ heat_temp_1 }}</td>
+                    <td>{{ heat_hours_1 }}</td>
+                    <td>{{ heat_cooling_1 }}</td>
+                    <td>{{ form|field_from_name:"heat_furnace_no" }}</td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td style="background: #ffffff;"></td>
+                    {% field_by_parts form "heat_row_" 2 "_temperature" as heat_temp_2 %}
+                    {% field_by_parts form "heat_row_" 2 "_hours" as heat_hours_2 %}
+                    {% field_by_parts form "heat_row_" 2 "_cooling" as heat_cooling_2 %}
+                    <td>{{ heat_temp_2 }}</td>
+                    <td>{{ heat_hours_2 }}</td>
+                    <td>{{ heat_cooling_2 }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th style="background: #ffffff;"></th>
+                    <td style="background: #ffffff;"></td>
+                    {% field_by_parts form "heat_row_" 3 "_temperature" as heat_temp_3 %}
+                    {% field_by_parts form "heat_row_" 3 "_hours" as heat_hours_3 %}
+                    {% field_by_parts form "heat_row_" 3 "_cooling" as heat_cooling_3 %}
+                    <td>{{ heat_temp_3 }}</td>
+                    <td>{{ heat_hours_3 }}</td>
+                    <td>{{ heat_cooling_3 }}</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sheet">
+            <table style="table-layout: fixed;">
+                <tr>
+                    <th style="background: #ffffff;">Item</th>
+                    <th style="background: #ffffff;">Description</th>
+                    <th style="background: #ffffff;">Specification</th>
+                    <th style="background: #ffffff;">Production No</th>
+                    <th style="background: #ffffff;">Total Quantity</th>
+                    <th style="background: #ffffff;">Supplied Quantity</th>
+                </tr>
+                {% for index in form.line_item_indices %}
+                    <tr>
+                        {% field_by_parts form "line_item_" index "_item" as item_field %}
+                        {% field_by_parts form "line_item_" index "_description" as description_field %}
+                        {% field_by_parts form "line_item_" index "_specification" as specification_field %}
+                        {% field_by_parts form "line_item_" index "_production_no" as production_field %}
+                        {% field_by_parts form "line_item_" index "_total_quantity" as total_qty_field %}
+                        {% field_by_parts form "line_item_" index "_supplied_quantity" as supplied_qty_field %}
+                        <td>{{ item_field }}</td>
+                        <td>{{ description_field }}</td>
+                        <td>{{ specification_field }}</td>
+                        <td>{{ production_field }}</td>
+                        <td>{{ total_qty_field }}</td>
+                        <td>{{ supplied_qty_field }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <th colspan="6" style="text-align: left; background: #ffffff;">
+                        Notes:<br>
+                        {{ form.notes }}
+                    </th>
+                </tr>
+                <tr>
+                    <td colspan="3" style="height: 120px;"></td>
+                    <td colspan="3" style="vertical-align: top; height: 120px;">
+                        <div style="font-weight: 700; margin-bottom: 10px;">Authorized Signatory &amp; Seal</div>
+                        <div style="display: flex; gap: 16px; align-items: flex-start; justify-content: space-between;">
+                            <div>
+                                {% if company_data and company_data.signature %}
+                                    <img src="{{ company_data.signature.url }}" alt="Signature" style="display:block; max-width: 150px; max-height: 70px;"><br>
+                                {% else %}
+                                    <div class="tiny">No signature uploaded in company data</div>
+                                {% endif %}
+                                <div style="margin-top: 10px;">{{ form.authorized_signatory }}</div>
+                                <div style="margin-top: 6px;">{{ form.signatory_role }}</div>
+                            </div>
+                            <div>
+                                {% if company_data and company_data.seal %}
+                                    <img src="{{ company_data.seal.url }}" alt="Seal" style="display:block; max-width: 110px; max-height: 110px;">
+                                {% else %}
+                                    <div class="tiny">No seal uploaded in company data</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <div class="actions">
+        <button type="submit" class="btn secondary">Save Draft</button>
+        <button type="submit" class="btn" name="submit" value="1">Save and Submit</button>
+    </div>
+</form>
+
+{% if form.instance.pk %}
+<script>
+    (function () {
+        const form = document.getElementById("document-form");
+        const status = document.getElementById("autosave-status");
+        if (!form || !form.dataset.autosaveUrl) {
+            return;
+        }
+
+        const csrfTokenInput = form.querySelector("input[name=csrfmiddlewaretoken]");
+        const csrfToken = csrfTokenInput ? csrfTokenInput.value : "";
+        let timer = null;
+
+        function setStatus(text) {
+            if (status) {
+                status.textContent = text;
+            }
+        }
+
+        async function autosave() {
+            setStatus("Saving draft...");
+            const formData = new FormData(form);
+            formData.delete("submit");
+
+            try {
+                const response = await fetch(form.dataset.autosaveUrl, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": csrfToken },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    setStatus("Autosave needs attention");
+                    return;
+                }
+
+                const payload = await response.json();
+                setStatus(payload.message + " " + payload.updated_at);
+            } catch (error) {
+                setStatus("Autosave unavailable");
+            }
+        }
+
+        form.addEventListener("input", function () {
+            setStatus("Changes pending...");
+            clearTimeout(timer);
+            timer = setTimeout(autosave, 900);
+        });
+    }());
+</script>
+{% endif %}
+{% endblock %}

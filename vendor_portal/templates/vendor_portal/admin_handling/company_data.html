@@ -1,0 +1,52 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Company Data | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>Company Data</h2>
+        <p>Store reusable company assets like signature and seal for future certificate output.</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'vendor_portal:admin_handling' %}" class="btn secondary">Back to Admin Handling</a>
+    </div>
+</section>
+
+<section class="grid two">
+    <article class="card">
+        <h3 class="section-title">Update Company Data</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="actions">
+                <button type="submit" class="btn">Save Company Data</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="card">
+        <h3 class="section-title">Current Assets</h3>
+        <div class="kv">
+            <div><strong>Company Name</strong>{{ company_data.company_name|default:"-" }}</div>
+            <div><strong>Company Address</strong>{{ company_data.company_address|default:"-" }}</div>
+            <div>
+                <strong>Signature</strong>
+                {% if company_data.signature %}
+                    <img src="{{ company_data.signature.url }}" alt="Signature" style="max-width: 180px;">
+                {% else %}
+                    Not uploaded
+                {% endif %}
+            </div>
+            <div>
+                <strong>Seal</strong>
+                {% if company_data.seal %}
+                    <img src="{{ company_data.seal.url }}" alt="Seal" style="max-width: 180px;">
+                {% else %}
+                    Not uploaded
+                {% endif %}
+            </div>
+        </div>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ document.document_number }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 9px;
+            color: #111;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        th, td {
+            border: 1px solid #222;
+            padding: 4px 5px;
+            vertical-align: middle;
+        }
+        th {
+            background: #ece6cf;
+        }
+        .center {
+            text-align: center;
+        }
+        .topbox {
+            background: #e7e0f2;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <th style="width:16%; background:#ffffff;" class="center">
+                Vendor Logo<br/>
+                {% if document.vendor.vendor_profile and document.vendor.vendor_profile.logo %}
+                    <img src="{{ document.vendor.vendor_profile.logo.url }}" alt="Vendor Logo" style="max-width:90px; max-height:55px; margin-top:6px;" />
+                {% endif %}
+            </th>
+            <td class="topbox center" style="width:68%;">
+                {{ document.company_name|default:"Company Name" }}<br>
+                {{ document.company_address|default:"" }}
+            </td>
+            <th class="center" style="width:16%; background:#ffffff;">
+                Barcode<br/>
+                {% if document.vendor.vendor_profile and document.vendor.vendor_profile.barcode %}
+                    <img src="{{ document.vendor.vendor_profile.barcode.url }}" alt="Vendor Barcode" style="max-width:90px; max-height:55px; margin-top:6px;" /><br/>
+                {% endif %}
+                {{ document.barcode_value|default:"" }}
+            </th>
+        </tr>
+        <tr>
+            <td><strong><i>TC No:{{ document.document_number }}</i></strong></td>
+            <td class="center">
+                <div style="font-size:11px;font-weight:bold;">TEST CERTIFICATE</div>
+                <div style="font-size:10px;font-weight:bold;">AS PER EN 10204 3.1</div>
+            </td>
+            <td><strong><i>Date:{{ document.certificate_date|date:"d.m.Y"|default:"-" }}</i></strong></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th colspan="2" class="center">CUSTOMER DETAILS</th>
+            <th colspan="2" class="center">RAW MATERIAL DETAILS</th>
+        </tr>
+        <tr><th style="background:#ffffff; width:17%;">Customer</th><td style="width:33%;">{{ document.customer_name }}</td><th style="background:#ffffff; width:17%;">Maker</th><td style="width:33%;">{{ document.maker|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff; width:17%;">P.O.No./Date</th><td style="width:33%;">{{ document.po_number|default:"-" }}</td><th style="background:#ffffff; width:17%;">Mill Certificate</th><td style="width:33%;">{{ document.mill_certificate_number|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff; width:17%;">Material Grade</th><td style="width:33%;">{{ document.material_grade|default:"-" }}</td><th style="background:#ffffff; width:17%;">Rm Specifications</th><td style="width:33%;">{{ document.raw_material_specification|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff; width:17%;">Material Standard</th><td style="width:33%;">{{ document.material_standard|default:"-" }}</td><th style="background:#ffffff; width:17%;">Mfg Process</th><td style="width:33%;">{{ document.manufacturing_process|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff; width:17%;">TDC NO</th><td style="width:33%;">{{ document.tdc_number|default:"-" }}</td><th style="background:#ffffff; width:17%;">Heat No</th><td style="width:33%;">{{ document.heat_number|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff; width:17%;"></th><td style="width:33%;"></td><th style="background:#ffffff; width:17%;">Specification/Standard</th><td style="width:33%;">{{ document.raw_material_standard|default:"-" }}</td></tr>
+    </table>
+
+    <table>
+        <tr>
+            <th colspan="4" class="center">FORGING DETAILS</th>
+        </tr>
+        <tr><th style="background:#ffffff;">Heat No</th><td>{{ document.forging_data.heat_no|default:"-" }}</td><th style="background:#ffffff;">Forge method</th><td>{{ document.forging_data.forge_method|default:"-" }}</td></tr>
+        <tr><th style="background:#ffffff;">Heat Batch No</th><td>{{ document.forging_data.heat_batch_no|default:"-" }}</td><th style="background:#ffffff;">Supplier Identification</th><td>{{ document.forging_data.supplier_identification|default:"-" }}</td></tr>
+    </table>
+
+    <table>
+        <tr>
+            <th colspan="16" class="center">CHEMICAL ANALYSIS (%)</th>
+        </tr>
+        <tr>
+            <th class="center" style="width:8%;">ELEMENTS (%)</th>
+            <th class="center" style="width:8%;"></th>
+            {% for key, value in document.chemical_data.items %}
+                <th class="center" {% if key == 'cr_mo_ni_cu_v' %}style="width:9%;"{% elif key == 'ce' %}style="width:6%;"{% else %}style="width:6.2%;"{% endif %}>{{ key|upper }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th style="background:#ffffff;">As per</th>
+            <th style="background:#ffffff;">Min :</th>
+            {% for key, value in document.chemical_data.items %}
+                <td>{{ value.min|default:"-" }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th style="background:#ffffff;">Specfn</th>
+            <th style="background:#ffffff;">Max :</th>
+            {% for key, value in document.chemical_data.items %}
+                <td>{{ value.max|default:"-" }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th style="background:#ffffff;">Actual</th>
+            <th style="background:#ffffff;"></th>
+            {% for key, value in document.chemical_data.items %}
+                <td>{{ value.actual|default:"-" }}</td>
+            {% endfor %}
+        </tr>
+    </table>
+
+    <table border="1" cellspacing="0" cellpadding="3" width="100%">
+        <tr>
+            <th colspan="11">MECHANICAL PROPERTIES</th>
+        </tr>
+
+        <tr>
+            <th width="60">As<br/>per</th>
+            <th width="70">YS<br/>(0.2%)</th>
+            <th width="70">UTS</th>
+            <th width="50">%EL</th>
+            <th width="90">%Red.<br/>Area</th>
+            <th width="50" colspan="2">Hardness</th>
+            <th width="120" colspan="3">Impact Test<br/>10x10x55</th>
+            <th width="60">-46°C</th>
+        </tr>
+
+        <tr>
+            <th>Specfn</th>
+            <th>MPa</th>
+            <th>MPa</th>
+            <th>GL=2</th>
+            <th></th>
+            <th colspan="2">HBW</th>
+            <th colspan="2">Single (J)</th>
+            <th>Min</th>
+            <th></th>
+        </tr>
+
+        <tr>
+            <th>Min</th>
+            <td>{{ document.mechanical_data.yield_strength.spec_min|default:"-" }}</td>
+            <td>{{ document.mechanical_data.tensile_strength.spec_min|default:"-" }}</td>
+            <td>{{ document.mechanical_data.elongation.spec_min|default:"-" }}</td>
+            <td>{{ document.mechanical_data.reduction_of_area.spec_min|default:"-" }}</td>
+            <td colspan="2"></td>
+            <td colspan="2"></td>
+            <td>{{ document.mechanical_data.impact_test.single_min|default:"-" }}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <th>Max</th>
+            <td>{{ document.mechanical_data.yield_strength.spec_max|default:"-" }}</td>
+            <td>{{ document.mechanical_data.tensile_strength.spec_max|default:"-" }}</td>
+            <td>{{ document.mechanical_data.elongation.spec_max|default:"-" }}</td>
+            <td>{{ document.mechanical_data.reduction_of_area.spec_max|default:"-" }}</td>
+            <td colspan="2">{{ document.mechanical_data.hardness_hbv.spec_max|default:"-" }}</td>
+            <td colspan="2">Avg (J)</td>
+            <td>{{ document.mechanical_data.impact_test.average_min|default:"-" }}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <th>Actual</th>
+            <td>{{ document.mechanical_data.yield_strength.actual|default:"-" }}</td>
+            <td>{{ document.mechanical_data.tensile_strength.actual|default:"-" }}</td>
+            <td>{{ document.mechanical_data.elongation.actual|default:"-" }}</td>
+            <td>{{ document.mechanical_data.reduction_of_area.actual|default:"-" }}</td>
+            <td>{{ document.mechanical_data.hardness_hbv.actual_values.0|default:"-" }}</td>
+            <td>{{ document.mechanical_data.hardness_hbv.actual_values.1|default:"-" }}</td>
+            <td>{{ document.mechanical_data.hardness_hbv.actual_values.2|default:"-" }}</td>
+            <td>{{ document.mechanical_data.impact_test.actual_values.0|default:"-" }}</td>
+            <td>{{ document.mechanical_data.impact_test.actual_values.1|default:"-" }}</td>
+            <td>{{ document.mechanical_data.impact_test.actual_values.2|default:"-" }}</td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <td colspan="9"></td>
+            <td>{{ document.mechanical_data.impact_test.low_temp_actual|default:"-" }}</td>
+        </tr>
+    </table>
+
+    <table>
+        <tr><th colspan="6" class="center">HEAT TREATMENT</th></tr>
+        <tr>
+            <th style="width:25%;">Heat No</th>
+            <td style="width:20%;">{{ document.heat_treatment_details.heat_no|default:"-" }}</td>
+            <th style="width:16%;">Heat Treatment<br/>Process</th>
+            <td style="width:14%;">{{ document.heat_treatment_details.process|default:"-" }}</td>
+            <th style="width:16%;">Furnace<br/>Type</th>
+            <td style="width:16%;">{{ document.heat_treatment_details.furnace_type|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <td></td>
+            <th>Temperature</th>
+            <th>Soking Time</th>
+            <th>Cooling Medium</th>
+            <th></th>
+        </tr>
+        <tr>
+            <th style="background:#ffffff;"></th>
+            <td style="background:#ffffff;"></td>
+            <th>Deg C</th>
+            <th>Hrs</th>
+            <th></th>
+            <th style="background:#ffffff;"></th>
+        </tr>
+        <tr>
+            <th style="width:18%;">Heat Batch No</th>
+            <td style="width:20%;">{{ document.heat_treatment_details.heat_batch_no|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.0.temperature_c|default:"-" }}</td>
+            <td style="width:14%;">{{ document.heat_treatment_details.rows.0.soaking_hours|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.0.cooling_medium|default:"-" }}</td>
+            <th style="width:16%;">HT Furnace No</th>
+        </tr>
+        <tr>
+            <th style="background:#ffffff;"></th>
+            <td style="background:#ffffff;"></td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.1.temperature_c|default:"-" }}</td>
+            <td style="width:14%;">{{ document.heat_treatment_details.rows.1.soaking_hours|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.1.cooling_medium|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.furnace_no|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th style="background:#ffffff;"></th>
+            <td style="background:#ffffff;"></td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.2.temperature_c|default:"-" }}</td>
+            <td style="width:14%;">{{ document.heat_treatment_details.rows.2.soaking_hours|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.2.cooling_medium|default:"-" }}</td>
+            <td style="width:16%;"></td>
+        </tr>
+        <tr>
+            <th style="background:#ffffff;"></th>
+            <td style="background:#ffffff;"></td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.3.temperature_c|default:"-" }}</td>
+            <td style="width:14%;">{{ document.heat_treatment_details.rows.3.soaking_hours|default:"-" }}</td>
+            <td style="width:16%;">{{ document.heat_treatment_details.rows.3.cooling_medium|default:"-" }}</td>
+            <td style="width:16%;"></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th style="background:#ffffff;">Item</th>
+            <th style="background:#ffffff;">Description</th>
+            <th style="background:#ffffff;">Specification</th>
+            <th style="background:#ffffff;">Production No</th>
+            <th style="background:#ffffff;">Total Quantity</th>
+            <th style="background:#ffffff;">Supplied Quantity</th>
+        </tr>
+        {% for row in document.line_items %}
+            <tr>
+                <td>{{ row.item|default:"-" }}</td>
+                <td>{{ row.description|default:"-" }}</td>
+                <td>{{ row.specification|default:"-" }}</td>
+                <td>{{ row.production_no|default:"-" }}</td>
+                <td>{{ row.total_quantity|default:"-" }}</td>
+                <td>{{ row.supplied_quantity|default:"-" }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <th colspan="6" style="background:#ffffff; text-align:left;">
+                Notes:<br>
+                {{ document.notes|linebreaksbr|default:"-" }}
+            </th>
+        </tr>
+        <tr>
+            <td colspan="3" style="height:90px;"></td>
+            <td colspan="3" style="height:90px; vertical-align:top;">
+                <div><strong>Authorized Signatory &amp; Seal</strong></div>
+                <table style="margin-top:8px; margin-bottom:0;">
+                    <tr>
+                        <td style="border:none; width:65%; vertical-align:top;">
+                            {% if company_data and company_data.signature %}
+                                <img src="{{ company_data.signature.path }}" alt="Signature" style="max-width:140px; max-height:55px;"><br>
+                            {% endif %}
+                            <div style="margin-top:8px;">{{ document.authorized_signatory|default:"-" }}</div>
+                            <div style="margin-top:6px;">{{ document.signatory_role|default:"-" }}</div>
+                        </td>
+                        <td style="border:none; width:35%; text-align:right; vertical-align:top;">
+                            {% if company_data and company_data.seal %}
+                                <img src="{{ company_data.seal.path }}" alt="Seal" style="max-width:95px; max-height:95px;">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

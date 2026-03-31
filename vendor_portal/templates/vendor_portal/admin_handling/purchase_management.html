@@ -1,0 +1,55 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Purchase Management | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>Purchase Management</h2>
+        <p>Create Purchase accounts here. Credentials are emailed automatically.</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'vendor_portal:admin_handling' %}" class="btn secondary">Back to Admin Handling</a>
+    </div>
+</section>
+
+<section class="grid two">
+    <article class="card">
+        <h3 class="section-title">Create Purchase User</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.role.as_hidden }}
+            <p>{{ form.full_name.label_tag }}{{ form.full_name }}</p>
+            <p>{{ form.email.label_tag }}{{ form.email }}</p>
+            <p>{{ form.phone.label_tag }}{{ form.phone }}</p>
+            <div class="actions">
+                <button type="submit" class="btn">Create Purchase User</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="card">
+        <h3 class="section-title">Existing Purchase Users</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in purchase_users %}
+                    <tr>
+                        <td>{{ user.first_name|default:user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>-</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3">No Purchase users created yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}{{ document.document_number }} | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>{{ document.document_number }}</h2>
+        <p>{{ document.customer_name }} | Revision R{{ document.revision }} | <span class="pill">{{ document.get_status_display }}</span></p>
+    </div>
+    <div class="actions">
+        {% if can_edit %}
+            <a href="{% url 'vendor_portal:document_edit' document.pk %}" class="btn secondary">Edit Document</a>
+        {% endif %}
+        {% if can_download_pdf %}
+            <a href="{% url 'vendor_portal:document_pdf' document.pk %}" class="btn">Download Final PDF</a>
+        {% endif %}
+        {% if can_download_excel %}
+            <a href="{% url 'vendor_portal:document_excel' document.pk %}" class="btn ghost">Download Filled Excel</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="split">
+    <div class="grid" style="gap: 20px;">
+        <article class="card">
+            <h3 class="section-title">Header Details</h3>
+            <div class="kv">
+                <div><strong>Vendor</strong>{{ document.vendor.username }}</div>
+                <div><strong>Customer</strong>{{ document.customer_name }}</div>
+                <div><strong>Customer Email</strong>{{ document.customer_email|default:"-" }}</div>
+                <div><strong>PO Number</strong>{{ document.po_number|default:"-" }}</div>
+                <div><strong>Material Grade</strong>{{ document.material_grade|default:"-" }}</div>
+                <div><strong>Material Standard</strong>{{ document.material_standard|default:"-" }}</div>
+                <div><strong>TDC Number</strong>{{ document.tdc_number|default:"-" }}</div>
+                <div><strong>Heat Number</strong>{{ document.heat_number|default:"-" }}</div>
+            </div>
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Chemical Analysis</h3>
+            <div class="kv">
+                {% for key, value in document.chemical_data.items %}
+                    <div>
+                        <strong>{{ key|upper }}</strong>
+                        Min: {{ value.min|default:"-" }}<br>
+                        Max: {{ value.max|default:"-" }}<br>
+                        Actual: {{ value.actual|default:"-" }}
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Mechanical Properties</h3>
+            <div class="kv">
+                {% for key, value in document.mechanical_data.items %}
+                    <div>
+                        <strong>{{ key|cut:"_"|title }}</strong>
+                        Min: {{ value.spec_min|default:"-" }}<br>
+                        Max: {{ value.spec_max|default:"-" }}<br>
+                        Actual: {{ value.actual|default:"-" }}
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Heat Treatment</h3>
+            <div class="kv">
+                <div><strong>Heat No</strong>{{ document.heat_treatment_details.heat_no|default:"-" }}</div>
+                <div><strong>Heat Batch No</strong>{{ document.heat_treatment_details.heat_batch_no|default:"-" }}</div>
+                <div><strong>Process</strong>{{ document.heat_treatment_details.process|default:"-" }}</div>
+                <div><strong>Furnace Type</strong>{{ document.heat_treatment_details.furnace_type|default:"-" }}</div>
+                <div><strong>Furnace No</strong>{{ document.heat_treatment_details.furnace_no|default:"-" }}</div>
+            </div>
+        </article>
+    </div>
+
+    <aside class="grid" style="gap: 20px;">
+        <article class="card">
+            <h3 class="section-title">Review Actions</h3>
+            {% if can_purchase_review %}
+                <form method="post" action="{% url 'vendor_portal:purchase_review' document.pk %}">
+                    {% csrf_token %}
+                    {{ review_form.as_p }}
+                    <div class="actions">
+                        <button type="submit" class="btn">Record Purchase Decision</button>
+                    </div>
+                </form>
+            {% elif can_qa_review %}
+                <form method="post" action="{% url 'vendor_portal:qa_review' document.pk %}">
+                    {% csrf_token %}
+                    {{ review_form.as_p }}
+                    <div class="actions">
+                        <button type="submit" class="btn">Record QA Decision</button>
+                    </div>
+                </form>
+            {% else %}
+                <p>No approval action is available for your role at the current status.</p>
+            {% endif %}
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Review History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Decision</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in document.reviews.all %}
+                        <tr>
+                            <td>{{ review.get_role_display }}</td>
+                            <td>{{ review.get_decision_display }}</td>
+                            <td>{{ review.comments }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3">No reviews yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Audit Trail</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>User</th>
+                        <th>When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in document.audit_logs.all %}
+                        <tr>
+                            <td>{{ log.get_action_display }}</td>
+                            <td>{{ log.user.username }}</td>
+                            <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3">No audit entries yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+
+        <article class="card">
+            <h3 class="section-title">Revision Snapshots</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Revision</th>
+                        <th>Reason</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for revision in document.revisions.all %}
+                        <tr>
+                            <td>R{{ revision.revision_number }}</td>
+                            <td>{{ revision.reason }}</td>
+                            <td>{{ revision.created_by.username }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3">No revision snapshots recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+    </aside>
+</section>
+{% endblock %}

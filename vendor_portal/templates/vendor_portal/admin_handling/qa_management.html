@@ -1,0 +1,55 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}QA Management | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>QA Management</h2>
+        <p>Create QA accounts here. Credentials are emailed automatically.</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'vendor_portal:admin_handling' %}" class="btn secondary">Back to Admin Handling</a>
+    </div>
+</section>
+
+<section class="grid two">
+    <article class="card">
+        <h3 class="section-title">Create QA User</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.role.as_hidden }}
+            <p>{{ form.full_name.label_tag }}{{ form.full_name }}</p>
+            <p>{{ form.email.label_tag }}{{ form.email }}</p>
+            <p>{{ form.phone.label_tag }}{{ form.phone }}</p>
+            <div class="actions">
+                <button type="submit" class="btn">Create QA User</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="card">
+        <h3 class="section-title">Existing QA Users</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in qa_users %}
+                    <tr>
+                        <td>{{ user.first_name|default:user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>-</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3">No QA users created yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+</section>
+{% endblock %}

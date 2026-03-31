@@ -1,0 +1,23 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Login | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+    <div class="card" style="max-width: 460px; width: 100%;">
+        <div class="page-head" style="margin-top: 0;">
+            <div>
+                <h2>Secure Sign-In</h2>
+                <p>Access the controlled Mill Test Certificate workflow for Vendor, Purchase, and QA.</p>
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="actions">
+                <button type="submit" class="btn">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

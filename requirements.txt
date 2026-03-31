@@ -1,0 +1,5 @@
+django==6.0.3
+xhtml2pdf
+xlrd
+xlutils
+xlwt

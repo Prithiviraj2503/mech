@@ -1,0 +1,57 @@
+{% extends "vendor_portal/base.html" %}
+
+{% block title %}Vendor Management | Vendor Quality Portal{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>Vendor Management</h2>
+        <p>Create vendor accounts here with logo and barcode uploads. Credentials are emailed automatically.</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'vendor_portal:admin_handling' %}" class="btn secondary">Back to Admin Handling</a>
+    </div>
+</section>
+
+<section class="grid two">
+    <article class="card">
+        <h3 class="section-title">Create Vendor</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.role.as_hidden }}
+            <p>{{ form.full_name.label_tag }}{{ form.full_name }}</p>
+            <p>{{ form.email.label_tag }}{{ form.email }}</p>
+            <p>{{ form.phone.label_tag }}{{ form.phone }}</p>
+            <p>{{ form.logo.label_tag }}{{ form.logo }}</p>
+            <p>{{ form.barcode.label_tag }}{{ form.barcode }}</p>
+            <div class="actions">
+                <button type="submit" class="btn">Create Vendor</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="card">
+        <h3 class="section-title">Existing Vendors</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Vendor</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                    <tr>
+                        <td>{{ vendor.vendor_name }}</td>
+                        <td>{{ vendor.user.email }}</td>
+                        <td>{{ vendor.phone|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3">No vendors created yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+</section>
+{% endblock %}
