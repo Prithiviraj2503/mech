@@ -141,6 +141,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 't2lbusinessa@gmail.com'
 EMAIL_HOST_PASSWORD = 'qmvq kfsc ajsi hlns'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@example.com'
+EMAIL_TIMEOUT = 10  # 10 second timeout to prevent worker hanging
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

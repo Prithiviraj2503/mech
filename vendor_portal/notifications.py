@@ -8,13 +8,16 @@ def _send_notification(subject, message, recipients):
     if not recipient_list:
         return
 
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-        recipient_list=recipient_list,
-        fail_silently=True,
-    )
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+            recipient_list=recipient_list,
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Error sending notification email: {str(e)}")
 
 
 def _role_emails(role):

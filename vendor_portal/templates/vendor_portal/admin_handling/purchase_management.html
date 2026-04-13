@@ -13,6 +13,109 @@
     </div>
 </section>
 
+<!-- Credentials Modal -->
+{% if failed_email_credentials %}
+<div id="credentialsModal" class="modal" style="display: flex;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚠️ Email Failed - Save Credentials</h3>
+            <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: #d32f2f; font-weight: bold;">The user was created but email could not be sent. Please save these credentials:</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; font-weight: bold; background-color: #f5f5f5; width: 30%;">Username:</td>
+                    <td style="padding: 12px; font-family: monospace; background-color: #fafafa;">{{ failed_email_credentials.username }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; font-weight: bold; background-color: #f5f5f5;">Password:</td>
+                    <td style="padding: 12px; font-family: monospace; background-color: #fafafa;">{{ failed_email_credentials.password }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; font-weight: bold; background-color: #f5f5f5;">Email:</td>
+                    <td style="padding: 12px;">{{ failed_email_credentials.email }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold; background-color: #f5f5f5;">Role:</td>
+                    <td style="padding: 12px;">{{ failed_email_credentials.role }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn secondary" onclick="copyToClipboard()">Copy Credentials</button>
+            <button type="button" class="btn" onclick="closeModal()">Done</button>
+        </div>
+    </div>
+</div>
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #999;
+    }
+    .modal-close:hover {
+        color: #333;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #eee;
+    }
+</style>
+<script>
+    function closeModal() {
+        document.getElementById('credentialsModal').style.display = 'none';
+    }
+    function copyToClipboard() {
+        const username = "{{ failed_email_credentials.username }}";
+        const password = "{{ failed_email_credentials.password }}";
+        const email = "{{ failed_email_credentials.email }}";
+        const text = `Username: ${username}\nPassword: ${password}\nEmail: ${email}`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Credentials copied to clipboard!');
+        });
+    }
+</script>
+{% endif %}
+
 <section class="grid two">
     <article class="card">
         <h3 class="section-title">Create Purchase User</h3>

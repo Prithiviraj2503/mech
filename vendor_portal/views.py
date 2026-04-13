@@ -92,6 +92,9 @@ class VendorManagementView(AdminOnlyMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.setdefault("form", AdminUserCreateForm(initial={"role": UserRole.VENDOR}))
         context["vendors"] = VendorProfile.objects.select_related("user")
+        # Get failed email credentials from session if present
+        if 'failed_email_credentials' in self.request.session:
+            context['failed_email_credentials'] = self.request.session.pop('failed_email_credentials')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -122,24 +125,44 @@ class VendorManagementView(AdminOnlyMixin, TemplateView):
                 barcode=form.cleaned_data.get("barcode"),
             )
 
-        send_mail(
-            subject=f"{user.get_role_display()} Portal Account Created",
-            message=(
-                f"Your portal account has been created.\n\n"
-                f"Role: {user.get_role_display()}\n"
-                f"Username: {username}\n"
-                f"Password: {password}\n"
-                f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
-            ),
-            from_email=None,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        # Send email asynchronously to avoid timeout
+        email_sent = False
+        try:
+            send_mail(
+                subject=f"{user.get_role_display()} Portal Account Created",
+                message=(
+                    f"Your portal account has been created.\n\n"
+                    f"Role: {user.get_role_display()}\n"
+                    f"Username: {username}\n"
+                    f"Password: {password}\n"
+                    f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            # Log the error but don't crash the request
+            print(f"Error sending email to {user.email}: {str(e)}")
+            # Store credentials in session to display in modal
+            request.session['failed_email_credentials'] = {
+                'username': username,
+                'password': password,
+                'email': user.email,
+                'role': user.get_role_display(),
+            }
 
-        messages.success(
-            request,
-            f"Vendor created successfully. Login details were emailed to {user.email}.",
-        )
+        if email_sent:
+            messages.success(
+                request,
+                f"Vendor created successfully. Login details were emailed to {user.email}.",
+            )
+        else:
+            messages.warning(
+                request,
+                f"Vendor created but email could not be sent. Credentials are displayed below.",
+            )
         return redirect("vendor_portal:vendor_management")
 
 
@@ -150,6 +173,9 @@ class PurchaseManagementView(AdminOnlyMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.setdefault("form", AdminUserCreateForm(initial={"role": UserRole.PURCHASE}))
         context["purchase_users"] = User.objects.filter(role=UserRole.PURCHASE).order_by("first_name", "username")
+        # Get failed email credentials from session if present
+        if 'failed_email_credentials' in self.request.session:
+            context['failed_email_credentials'] = self.request.session.pop('failed_email_credentials')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -171,21 +197,35 @@ class PurchaseManagementView(AdminOnlyMixin, TemplateView):
             first_name=form.cleaned_data["full_name"],
         )
 
-        send_mail(
-            subject="Purchase Portal Account Created",
-            message=(
-                f"Your portal account has been created.\n\n"
-                f"Role: Purchase\n"
-                f"Username: {username}\n"
-                f"Password: {password}\n"
-                f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
-            ),
-            from_email=None,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        email_sent = False
+        try:
+            send_mail(
+                subject="Purchase Portal Account Created",
+                message=(
+                    f"Your portal account has been created.\n\n"
+                    f"Role: Purchase\n"
+                    f"Username: {username}\n"
+                    f"Password: {password}\n"
+                    f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            print(f"Error sending email to {user.email}: {str(e)}")
+            request.session['failed_email_credentials'] = {
+                'username': username,
+                'password': password,
+                'email': user.email,
+                'role': 'Purchase',
+            }
 
-        messages.success(request, f"Purchase user created successfully. Login details were emailed to {user.email}.")
+        if email_sent:
+            messages.success(request, f"Purchase user created successfully. Login details were emailed to {user.email}.")
+        else:
+            messages.warning(request, f"Purchase user created but email could not be sent. Credentials are displayed below.")
         return redirect("vendor_portal:purchase_management")
 
 
@@ -196,6 +236,9 @@ class QaManagementView(AdminOnlyMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.setdefault("form", AdminUserCreateForm(initial={"role": UserRole.QC}))
         context["qa_users"] = User.objects.filter(role=UserRole.QC).order_by("first_name", "username")
+        # Get failed email credentials from session if present
+        if 'failed_email_credentials' in self.request.session:
+            context['failed_email_credentials'] = self.request.session.pop('failed_email_credentials')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -217,21 +260,35 @@ class QaManagementView(AdminOnlyMixin, TemplateView):
             first_name=form.cleaned_data["full_name"],
         )
 
-        send_mail(
-            subject="QA Portal Account Created",
-            message=(
-                f"Your portal account has been created.\n\n"
-                f"Role: QA\n"
-                f"Username: {username}\n"
-                f"Password: {password}\n"
-                f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
-            ),
-            from_email=None,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        email_sent = False
+        try:
+            send_mail(
+                subject="QA Portal Account Created",
+                message=(
+                    f"Your portal account has been created.\n\n"
+                    f"Role: QA\n"
+                    f"Username: {username}\n"
+                    f"Password: {password}\n"
+                    f"Login URL: {request.build_absolute_uri(reverse('vendor_portal:login'))}\n"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            print(f"Error sending email to {user.email}: {str(e)}")
+            request.session['failed_email_credentials'] = {
+                'username': username,
+                'password': password,
+                'email': user.email,
+                'role': 'QA',
+            }
 
-        messages.success(request, f"QA user created successfully. Login details were emailed to {user.email}.")
+        if email_sent:
+            messages.success(request, f"QA user created successfully. Login details were emailed to {user.email}.")
+        else:
+            messages.warning(request, f"QA user created but email could not be sent. Credentials are displayed below.")
         return redirect("vendor_portal:qa_management")
 
 
